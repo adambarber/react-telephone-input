@@ -57,8 +57,9 @@ function scrollToTop(scrollDuration) {
 
 var ReactTelephoneInput = React.createClass({
     getInitialState: function() {
-        var selectedCountryGuess, selectedCountryGuessIndex, inputNumber = this.props.value || '';
-
+        var selectedCountryGuess;
+        var selectedCountryGuessIndex;
+        var inputNumber = this.props.value || '';
         if(trim(inputNumber) !== '') {
             selectedCountryGuess = this.guessSelectedCountry(inputNumber.replace(/\D/g, ''));
             if(!selectedCountryGuess || !selectedCountryGuess.name) {
@@ -94,17 +95,16 @@ var ReactTelephoneInput = React.createClass({
         value: React.PropTypes.string,
         autoFormat: React.PropTypes.bool,
         defaultCountry: React.PropTypes.string,
-        onlyCountries: React.PropTypes.arrayOf(React.PropTypes.string),
+        // onlyCountries: React.PropTypes.arrayOf(React.PropTypes.string),
         preferredCountries: React.PropTypes.arrayOf(React.PropTypes.string),
         onChange: React.PropTypes.func,
     },
     getDefaultProps: function() {
-
         return {
             value: '',
             autoFormat: true,
+            defaultCountry: 'us',
             onlyCountries: allCountries,
-            defaultCountry: allCountries[0].iso2,
             isValid: isNumberValid
         };
     },
@@ -125,6 +125,14 @@ var ReactTelephoneInput = React.createClass({
     componentWillUnmount: function() {
         document.removeEventListener('keydown', this.handleKeydown);
         document.removeEventListener('click', this.handleDocumentClick);
+    },
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.value === 'empty') {
+            this.setState({ 
+                formattedNumber: '+1 ', 
+                selectedCountry: _.findWhere(allCountries, {iso2: 'us'})
+            });
+        }
     },
     scrollTo: function(country, middle) {
         if(!country) return;
@@ -218,7 +226,6 @@ var ReactTelephoneInput = React.createClass({
         }, {dialCode: '', priority: 10001}, this);
     }),
     getElement: function(index) {
-        console.log('index of country to jump to: ', index);
         return this.refs['flag_no_'+index].getDOMNode();
     },
     handleFlagDropdownClick: function() {
@@ -345,8 +352,6 @@ var ReactTelephoneInput = React.createClass({
     searchCountry: function() {
         var probableCandidate = this._searchCountry(this.state.queryString) || this.props.onlyCountries[0];
         var probableCandidateIndex = _.findIndex(this.props.onlyCountries, probableCandidate) + this.state.preferredCountries.length;
-console.log('probable candidate index: ', probableCandidateIndex);
-console.log('preferred country length: ', this.state.preferredCountries.length);
         this.scrollTo(this.getElement(probableCandidateIndex), true);
 
         this.setState({
