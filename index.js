@@ -8,9 +8,7 @@ var React = require('react/addons');
 var countryData = require('./country_data');
 var allCountries = countryData.allCountries;
 
-require('./styles.less');
-
-var isModernBrowser = Boolean(document.createElement('input').setSelectionRange);
+var isModernBrowser = true;
 
 var keys = {
         UP: 38,
